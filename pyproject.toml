@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "harness2-analyzer"
+version = "0.1.0"
+description = "The first stage of the Harness² analyzer: evaluation units, deterministic failure signatures, an offline report, and a harness2 evaluator for harness2 traces and atelier events."
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.12,<3.14"
+classifiers = [
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: POSIX",
+]
+# ingest, signature and report use only the standard library; harness2 is needed for the
+# evaluator, which harness2-evaluate loads.
+dependencies = [
+    "harness2 @ git+https://github.com/reeschan/harness2.git@cfeafeacd0b57222546a29d5d262d1fef06129da",
+]
+
+[project.scripts]
+h2a = "harness2_analyzer.cli:main"
+
+[project.entry-points."harness2.evaluators"]
+analyzer = "harness2_analyzer.evaluator:evaluator_from_options"
+
+[tool.setuptools.packages.find]
+include = ["harness2_analyzer*"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
