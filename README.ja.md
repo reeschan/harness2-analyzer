@@ -6,6 +6,13 @@
 
 設計は analyzer の設計書 draft-2 (2026-11-11) の §4 (`harness.unit/1`)・§5.1 (1 段目のシグネチャ)・§8 (`h2a ingest`・`h2a signature`・`h2a report`)・§9 (評価者)。2 段目 (ファセット・埋め込み・HDBSCAN)・`round`・replay・Hodoscope の書き出しは、まだ入れていない。held-out を使う判定もしない。
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/architecture/architecture-dark.svg">
+  <img src="assets/architecture/architecture-light.svg" alt="harness2-analyzer のアーキテクチャ図。h2a ingest が harness2 の task run と atelier の docs/pbi の記録を読み、本文の無い unit・順番の破れ・atelier のイベントを harness2 の trace にしたものを analysis フォルダに書く。h2a signature が unit ごとに1 段目のシグネチャを付け、h2a report がオフラインの HTML を書く。harness2-evaluate は trace を run graph として読み、entry point harness2.evaluators から評価者 analyzer を読み込んで findings.json を書く。">
+</picture>
+
+図のソースは `assets/architecture/architecture.d2`。arch-diagram スキルの `render.py` で描き直す。
+
 ## 要るもの
 
 - POSIX (Linux か macOS)。Windows では WSL を使う (harness2 が `fcntl` を import するため)。

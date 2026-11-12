@@ -1,0 +1,122 @@
+# harness2-analyzer architecture (stage 1)
+# __MONO__ is the color of single-color logos. render.py draws a light (000000) and a dark (ffffff) copy.
+# Render: python <arch-diagram>/scripts/render.py assets/architecture/architecture.d2
+direction: right
+
+vars: {
+  d2-config: {
+    layout-engine: elk
+    pad: 40
+  }
+}
+
+classes: {
+  svc: {
+    shape: rectangle
+    style: {
+      border-radius: 12
+      font-size: 15
+    }
+  }
+  ext: {
+    shape: image
+    width: 64
+    height: 64
+    label.near: outside-bottom-center
+  }
+  zone: {
+    style.border-radius: 16
+  }
+  saas: {
+    style: {
+      border-radius: 16
+      stroke-dash: 3
+    }
+  }
+}
+
+owner: "owner" {
+  class: ext
+  icon: https://icons.terrastruct.com/essentials%2F359-users.svg
+}
+
+inputs: "raw records (L0)" {
+  class: saas
+
+  h2runs: "harness2 task runs\ntrace.jsonl · summary.json" {
+    class: svc
+    icon: https://icons.terrastruct.com/essentials%2F245-folder.svg
+  }
+  atelier: "atelier docs/pbi\nevents · runs · cases · presentations" {
+    class: svc
+    icon: https://icons.terrastruct.com/essentials%2F245-folder.svg
+  }
+}
+
+h2a: "harness2-analyzer (WSL / POSIX, stdlib only)" {
+  class: zone
+  icon: https://cdn.simpleicons.org/python
+
+  ingest: "h2a ingest\nunits · order rules · atelier traces" {
+    class: svc
+  }
+  signature: "h2a signature\nstage 1 sig_id per unit" {
+    class: svc
+  }
+  report: "h2a report\noffline HTML" {
+    class: svc
+  }
+  evaluator: "analyzer evaluator\nentry point harness2.evaluators" {
+    class: svc
+  }
+}
+
+out: "analysis folder" {
+  class: zone
+  icon: https://icons.terrastruct.com/essentials%2F245-folder.svg
+
+  units: "units.jsonl · order.jsonl\nharness.unit/1, body-free" {
+    class: svc
+    icon: https://icons.terrastruct.com/essentials%2F257-file.svg
+  }
+  traces: "traces/<run>/trace.jsonl\natelier events as spans" {
+    class: svc
+    icon: https://icons.terrastruct.com/essentials%2F257-file.svg
+  }
+  sigs: "signatures.jsonl\nsig_summary.json" {
+    class: svc
+    icon: https://icons.terrastruct.com/essentials%2F257-file.svg
+  }
+  html: "report.html\nversions · signatures · order breaks" {
+    class: svc
+    icon: https://icons.terrastruct.com/essentials%2F257-file.svg
+  }
+}
+
+harness2: "harness2" {
+  class: zone
+  icon: https://cdn.simpleicons.org/python
+
+  evaluate: "harness2-evaluate\n--evaluators rules,analyzer" {
+    class: svc
+  }
+  findings: "findings.json\nsafety · reproducibility" {
+    class: svc
+    icon: https://icons.terrastruct.com/essentials%2F257-file.svg
+  }
+}
+
+owner -> h2a.ingest: "runs h2a"
+inputs.h2runs -> h2a.ingest
+inputs.atelier -> h2a.ingest
+h2a.ingest -> out.units
+h2a.ingest -> out.traces
+h2a.ingest -> h2a.signature: "units"
+h2a.signature -> out.sigs
+h2a.signature -> h2a.report: "signatures"
+h2a.report -> out.html
+out.traces -> harness2.evaluate: "run graph"
+h2a.evaluator -> harness2.evaluate: "loaded by" {
+  style.stroke-dash: 4
+}
+harness2.evaluate -> harness2.findings

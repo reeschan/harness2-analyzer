@@ -12,6 +12,13 @@ signatures), §8 (`h2a ingest`, `h2a signature`, `h2a report`) and §9 (the eval
 stage (facets, embeddings, HDBSCAN), `round`, replay and the Hodoscope export are not part of
 this package yet. Nothing here judges held-out splits.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/architecture/architecture-dark.svg">
+  <img src="assets/architecture/architecture-light.svg" alt="harness2-analyzer architecture: h2a ingest reads harness2 task runs and atelier docs/pbi records and writes body-free units, order breaks and harness2 traces of the atelier events into the analysis folder; h2a signature adds a stage 1 signature to each unit and h2a report writes an offline HTML report; harness2-evaluate reads the traces as its run graph, loads the analyzer evaluator through the harness2.evaluators entry point, and writes findings.json.">
+</picture>
+
+The diagram source is `assets/architecture/architecture.d2`. Redraw it with the arch-diagram skill's `render.py`.
+
 ## Requirements
 
 - POSIX: Linux or macOS. On Windows, use WSL (harness2 imports `fcntl`).
