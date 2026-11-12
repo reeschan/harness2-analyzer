@@ -2,7 +2,9 @@
 
 # harness2-analyzer
 
-[harness2](https://github.com/reeschan/harness2) と atelier スキルのための analyzer の 1 段目。harness2 の trace と atelier のイベントを読み、試行を 1 つずつ本文の無い `harness.unit/1` の行にし、決まった規則の失敗シグネチャを付け、オフラインの HTML レポートを書く。`harness2-evaluate` に評価者 `analyzer` を足す。
+[harness2](https://github.com/reeschan/harness2) のための評価の分析器 (1 段目)。エージェントのシステムの試行を、本文の無い 1 行 `harness.unit/1` にそろえ、決まった規則の失敗シグネチャを付け、版 (変更の前と後) をオフラインの HTML レポートで比べる。`harness2-evaluate` に評価者 `analyzer` も足す。
+
+アダプタは 2 つ入っている。harness2 の trace (rollout 1 つ = 1 unit) と、atelier スキルの記録 (PBI の attempt 1 つ = 1 unit)。unit・シグネチャ・レポート・順番の規則の仕組みは、どちらのシステムにも依らない。システムごとの部分は [アダプタと規則](#アダプタと規則) に書いた。
 
 設計は analyzer の設計書 draft-2 (2026-11-11) の §4 (`harness.unit/1`)・§5.1 (1 段目のシグネチャ)・§8 (`h2a ingest`・`h2a signature`・`h2a report`)・§9 (評価者)。2 段目 (ファセット・埋め込み・HDBSCAN)・`round`・replay・Hodoscope の書き出しは、まだ入れていない。held-out を使う判定もしない。
 
@@ -49,6 +51,22 @@ harness2-evaluate --runs analysis/traces --evaluators rules,analyzer
 | `report.html` | 自己完結のレポート。版の比較・失敗のシグネチャ・根因・順番の破れ |
 
 unit には整数・数・真偽・列挙・短い識別子しか入れない。自由文は `h:<12 桁>` にハッシュするか、弾く。レポートは版を `change_id`、無ければ `config_fp`・`harness_fp`・worker のプロンプトのハッシュの順で取って並べるので、変更の前後の run を比べられる。
+
+## アダプタと規則
+
+| 部分 | モジュール | 対象 |
+|---|---|---|
+| `harness.unit/1` と本文が無いことの点検 | `units.py`・`ids.py` | どのシステムでも |
+| シグネチャの行と `sig_id` ごとの数 | `signature.py` | どのシステムでも |
+| HTML レポート | `report.py` | どのシステムでも |
+| 順番の規則の仕組み (`Before`・`NotAfter`) | `order.py` | どのイベントの列でも |
+| harness2 のアダプタ (trace → unit) | `h2trace.py` | harness2 |
+| atelier のアダプタ (events・runs・cases → unit) | `atelier.py` | atelier |
+| atelier のイベントを harness2 の trace にする | `bridge.py` | atelier |
+| 既定の順番の規則 (`DEFAULT_RULES`) | `order.py` | atelier のイベント |
+| 評価者 `analyzer` | `evaluator.py` | harness2 (`harness2.evaluators`) |
+
+ほかのシステムを足すには、`harness.unit/1` の行を返すアダプタ (順番の規則も使うなら、type・run id・時刻を持つイベントも)、`units.System` の値、`cli.py` の入力の引数が要る。アダプタを差し込む仕組みはまだ無い。3 つ目のシステムが来たときに作る。
 
 ## シグネチャ
 

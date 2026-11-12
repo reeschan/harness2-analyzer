@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "harness2-analyzer"
 version = "0.1.0"
-description = "The first stage of the Harness² analyzer: evaluation units, deterministic failure signatures, an offline report, and a harness2 evaluator for harness2 traces and atelier events."
+description = "An evaluation analyzer for Harness², stage 1: body-free evaluation units from any agent system, deterministic failure signatures, version comparison in an offline report, and a harness2 evaluator. Adapters for harness2 traces and atelier records are built in."
 readme = "README.md"
 license = "Apache-2.0"
 requires-python = ">=3.12,<3.14"

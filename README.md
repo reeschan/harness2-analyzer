@@ -2,10 +2,15 @@ English | [日本語](README.ja.md)
 
 # harness2-analyzer
 
-The first stage of the analyzer for [harness2](https://github.com/reeschan/harness2) and the
-atelier skill. It reads harness2 traces and atelier events, turns every trial into a body-free
-`harness.unit/1` row, gives each row a deterministic failure signature, writes an offline HTML
-report, and adds the `analyzer` evaluator to `harness2-evaluate`.
+An evaluation analyzer for [harness2](https://github.com/reeschan/harness2), stage 1. It brings
+the trials of any agent system into one body-free row, `harness.unit/1`, gives each row a
+deterministic failure signature, and compares versions (before and after a change) in an offline
+HTML report. It also adds the `analyzer` evaluator to `harness2-evaluate`.
+
+Two adapters are built in: harness2 traces (one unit per rollout) and the atelier skill's records
+(one unit per PBI attempt). The unit, the signatures, the report and the order-rule engine do not
+depend on either system; see [Adapters and rules](#adapters-and-rules) for what is specific to
+each.
 
 The design is the analyzer design draft-2 (2026-11-11): §4 (`harness.unit/1`), §5.1 (stage 1
 signatures), §8 (`h2a ingest`, `h2a signature`, `h2a report`) and §9 (the evaluator). The second
@@ -61,6 +66,24 @@ harness2-evaluate --runs analysis/traces --evaluators rules,analyzer
 A unit holds only integers, numbers, booleans, enumerated values and short identifiers; free text
 is hashed to `h:<12 hex>` or rejected. The report compares versions by `change_id`, else
 `config_fp`, `harness_fp` or the worker prompt hash, so the runs before and after a change line up.
+
+## Adapters and rules
+
+| Part | Module | Scope |
+|---|---|---|
+| `harness.unit/1` and its body-free check | `units.py`, `ids.py` | any system |
+| Signature rows and counts per `sig_id` | `signature.py` | any system |
+| HTML report | `report.py` | any system |
+| Order-rule engine (`Before`, `NotAfter`) | `order.py` | any event stream |
+| harness2 adapter: traces to units | `h2trace.py` | harness2 |
+| atelier adapter: events, runs and cases to units | `atelier.py` | atelier |
+| atelier events as harness2 traces | `bridge.py` | atelier |
+| Default order rules (`DEFAULT_RULES`) | `order.py` | atelier events |
+| `analyzer` evaluator | `evaluator.py` | harness2 (`harness2.evaluators`) |
+
+Another system needs its own adapter that returns `harness.unit/1` rows (and, for order rules,
+events with a type, a run id and a time), a value in `units.System`, and an input flag in `cli.py`.
+There is no plug-in point for adapters yet; one will be added when a third system arrives.
 
 ## Signatures
 
